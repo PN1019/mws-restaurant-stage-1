@@ -39,7 +39,7 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
 }
 #footer {
   background-color: #444;
-  color: #E3E3E3;
+  color: #e0dede;
   font-size: 10pt;
   letter-spacing: 1px;
   padding: 25px 0;
@@ -183,9 +183,9 @@ nav h1 a {
   display:inline;
 }
 #restaurants-list li a {
-  background-color: #d19d0e;
+  background-color: #FFA726;
   border-bottom: 3px solid #eee;
-  color: #fff;
+  color: #2B2B2B;//Improved contrast text Ratio
   display: inline-block;
   font-size: 10pt;
   padding:10px 0;
