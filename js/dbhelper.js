@@ -157,11 +157,21 @@ class DBHelper {
    * Map marker for a restaurant.
    */
    static mapMarkerForRestaurant(restaurant, map) {
+	   const redIcon = new L.Icon({
+      iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+      iconSize: [25, 41],
+      iconAnchor: [12, 41],
+      popupAnchor: [1, -34],
+      shadowSize: [41, 41]
+    });
     // https://leafletjs.com/reference-1.3.0.html#marker  
-    const marker = new L.marker([restaurant.latlng.lat, restaurant.latlng.lng],
-      {title: restaurant.name,
-      alt: restaurant.name,
-      url: DBHelper.urlForRestaurant(restaurant)
+    let marker = new L.marker([restaurant.latlng.lat, restaurant.latlng.lng],
+      {
+	   icon:redIcon,
+	   title: restaurant.name,
+       alt: restaurant.name,
+       url: DBHelper.urlForRestaurant(restaurant)
       })
       marker.addTo(newMap);
     return marker;
