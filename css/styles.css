@@ -14,7 +14,7 @@ ul, li {
 	color: #333;
 }
 a {
-	color: #3397db;
+	color: #19a2ff;
 	text-decoration: none;
 }
 a:hover, a:focus {
@@ -266,8 +266,7 @@ nav h1 a {
 #reviews-container {
   padding: 10px 1.9% 0;
 }
-#reviews-container h3,
-#add-review-container h3 {
+#reviews-container h3 {
   color: #f58500;
   font-size: 16pt;
   font-weight: 300;
@@ -330,7 +329,7 @@ nav h1 a {
   #breadcrumb,
   #restaurant-container,
   #reviews-container,
-  #add-review-container {
+   {
 		padding-left: 3%;
 		padding-right: 3%;
 		width: 94%;

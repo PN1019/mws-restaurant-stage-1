@@ -161,6 +161,8 @@ createRestaurantHTML = (restaurant) => {
   const image = document.createElement('img');
   image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  // Add alt-text for restaurant images according to restaurant names.
+  image.alt = restaurant.name + ' restaurant image';
   li.append(image);
 
   const name = document.createElement('h1');
@@ -178,6 +180,9 @@ createRestaurantHTML = (restaurant) => {
   const more = document.createElement('a');
   more.innerHTML = 'View Details';
   more.href = DBHelper.urlForRestaurant(restaurant);
+  // Make link have aria role of button with better label for improved accessibility and user experience.
+  more.setAttribute('role', 'button');
+  more.setAttribute('aria-label', 'view details of ' + restaurant.name + ' restaurant');
   li.append(more)
 
   return li
