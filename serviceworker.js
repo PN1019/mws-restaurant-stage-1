@@ -1,46 +1,30 @@
 const staticCacheName = 'restaurant-reviews-v4';
+var imgCache = 'restaurant-img';
 
-self.addEventListener('install', function(event) {
-   console.log("Service Worker installed");
-event.waitUntil(
-    caches.open(staticCacheName).then(function(cache) {
-      return cache.addAll([
+var filesToCache=[
 	    './',
         './index.html',
         './restaurant.html',
-		'./offline.html',
-		'./data/restaurants.json',
+		'./offline.html',   
+		'./manifest.json',
+		// Remove resturants.json from cache as  data is  coming from server.
         './css/styles.css',
-		'./img/1.jpg',
-        './img/2.jpg',
-        './img/3.jpg',
-        './img/4.jpg',
-        './img/5.jpg',
-        './img/6.jpg',
-        './img/7.jpg',
-        './img/8.jpg',
-        './img/9.jpg',
-        './img/10.jpg',
-		'./img/marker-icon-2x-red.png',
-        './img/marker-shadow.png',
-		'./img/offlinegiphy.gif',
-		'./img/icons/iconman.png',
-		'./img/icons/iconman-48x48.png',
-		'./img/icons/iconman-64x64.png',
-		'./img/icons/iconman-128x128.png',
-		'./img/icons/iconman-256x256.png',
-		'./img/icons/iconman-512x512.png',
 		'./js/dbhelper.js',
 		'./js/main.js',
         './js/restaurant_info.js',
-		'./register_sw.js',
-		'./serviceworker.js',
+		'./js/idb.js',
 		'https://unpkg.com/leaflet@1.3.1/dist/leaflet.css',
 		'https://unpkg.com/leaflet@1.3.1/dist/leaflet.js',
-		 ]);
+		 ];
+/**
+ * This block is invoked when install event is fired
+ */
+self.addEventListener('install', function(event) {
+  event.waitUntil(
+    caches.open(staticCacheName).then(function(cache) {
+      return cache.addAll(filesToCache);
     })
   );
-   console.log("cache successful");
 });
 // deletes old cache
 self.addEventListener('activate', function(event) {
@@ -61,8 +45,16 @@ self.addEventListener('activate', function(event) {
 });
 
 self.addEventListener('fetch', function(event) {
-   //console.log("Service Worker starting fetch");
-  event.respondWith(
+	var requestUrl = new URL(event.request.url);
+	// Check if the image type
+  if (/\.(jpg|png|gif|webp).*$/.test(requestUrl.pathname)) {
+	  event.respondWith(cacheImages(event.request));
+   return;
+}
+event.respondWith(
+  /*  fetch(returnUrl, {
+		     mode: 'no-cors'
+		   }) */
     caches.open(staticCacheName).then(function(cache) {
       return cache.match(event.request).then(function (response) {
         if (response) {
@@ -86,5 +78,43 @@ self.addEventListener('fetch', function(event) {
     })
   );
 });
+
+/**
+* @description Adds photos to the imgCache
+* @param {string} request
+* @returns {Response}
+*/
+function cacheImages(request) {
+  var storageUrl = new URL(request.url).pathname;
+
+  return caches.open(imgCache).then(function(cache) {
+    return cache.match(storageUrl).then(function(response) {
+      if (response) return response;
+
+      return fetch(request).then(function(networkResponse) {
+        cache.put(storageUrl, networkResponse.clone());
+        return networkResponse;
+      });
+    });
+  });
+}
+
+/* // Inspect the accept header for WebP support
+  var supportsWebp = false;
+  if (event.request.headers.has('accept')){
+	supportsWebp = event.request.headers
+        	                    .get('accept')
+                                    .includes('webp');
+      	}
+		// If we support WebP
+  	if (supportsWebp)
+  	{
+		// Clone the request
+		var req = event.request.clone();
+
+	        // Build the return URL
+	    	var returnUrl = req.url.substr(0, req.url.lastIndexOf(".")) + ".webp";
+	//console.log("Service Worker starting fetch"); */
+  
 
  

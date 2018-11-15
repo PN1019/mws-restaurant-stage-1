@@ -1,40 +1,103 @@
 /**
  * Common database helper functions.
  */
+//const RESTAURANT_REVIEWS_OBJ_STORE = 'restaurantReviews';
+
 class DBHelper {
 
   /**
    * Database URL.
-   * Change this to restaurants.json file location on your server.
+   * Function will return URL to fetch restaurant data
    */
   static get DATABASE_URL() {
     const port = 1337 // Change this to your server port
     return `http://localhost:${port}/restaurants/`;
   }
+/**
+   * @description
+   * This function will create object store name 'restaurantList' inside
+   * 'restaurant-reviews' db and stores promise in a dbPromise variable
+   */
+  static initIDB() {
+    this.dbPromise = idb.open('restaurant-reviews', 1, function (upgradeDb) {
+      var reviewsStore = upgradeDb.createObjectStore('restaurantReviews', {
+        keyPath: 'id'
+      });
+      
+      reviewsStore.createIndex('restaurantId', 'restaurant_id');
 
+
+    });
+  }
+
+  /**
+   * @description
+   * This function will return all the restaurant data from indexedDB.
+   */
+  static getRestaurantsDataFromIDBCache() {
+    return this.dbPromise.then(db => {
+      var tx = db.transaction('restaurantReviews');
+      var reviewsStore = tx.objectStore('restaurantReviews');
+      return reviewsStore.getAll();
+    })
+  }
+  
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
+	  var self = this;
+     DBHelper.getRestaurantsDataFromIDBCache().then(restaurants => {
+      /**
+       * Check if restaurant data is already cached in Indexed DB.
+       */
+      if (restaurants.length > 0) {
+        callback(null, restaurants);
+	  }else {
+		  /**
+         * If data is not cached then make a network request.
+         */
 	  //Change from XHR To Fetch API
     fetch(DBHelper.DATABASE_URL)
-    .then(response => response.json())
-    .then(function(jsonResponse) {
-      console.log("fetch is working!");
-      callback(null, jsonResponse);
-    })
-    .catch(function(error) {
-      console.log("Uh oh, fetch is bad");
-      const errorMessage = (`Request failed. Returned status of ${error}`);
-      callback(errorMessage, null);
+    .then(response => {
+          //If request is unsuccessfull then throw error.
+          if (!response.ok) {
+            throw new Error(response.statusText);
+          }
+		  //convert data in response received from server to json.
+          return response.json();
+	})
+    .then(restaurants => {
+          //processing the json data sent from the previous callback function.
+          DBHelper.addRestaurantsToIDB(restaurants);
+          callback(null, restaurants);
+         }).catch(error => {
+          callback(error, null);
     });
   }
-  }
+	 });
+ }
+ /**
+     * @description This method will add restaurant data to IDB
+     * @param {string} restaurants - Array of restaurants
+     */
+    static addRestaurantsToIDB (restaurants) {
+      var self = this;
+      restaurants.forEach(restaurant => {
+        self.dbPromise.then(db => {
+          var tx = db.transaction(['restaurantReviews'], 'readwrite');
+          var reviewsStore = tx.objectStore('restaurantReviews');
+          reviewsStore.put(restaurant);
+          return tx.complete;
+        });
+      });
+    }
+
 
   /**
    * Fetch a restaurant by its ID.
    */
-  static fetchRestaurantById(id, callback) {
+  static fetchRestaurantById(id,callback) {
     // fetch all restaurants with proper error handling.
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
@@ -150,7 +213,7 @@ class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return (`/img/${restaurant.photograph}.jpg`);
+    return (`/img/${restaurant.photograph}`);
   }
 
   /**
