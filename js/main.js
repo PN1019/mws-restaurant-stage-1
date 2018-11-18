@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initMap(); // added 
   fetchNeighborhoods();
   fetchCuisines();
+  
+  
 });
 
 
@@ -151,11 +153,11 @@ const createRestaurantHTML = (restaurant) => {
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
-  image.src='/img/placeholder.webp';
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.dataset.src = DBHelper.imageUrlForRestaurant(restaurant);
   // Add alt-text for restaurant images according to restaurant names.
   image.alt = restaurant.name + ' restaurant image';
   li.append(image);
+   window.lazyImageObserver.observe(image);
 
   const name = document.createElement('h2');
   name.innerHTML = restaurant.name;
@@ -205,4 +207,22 @@ const addMarkersToMap = (restaurants = self.restaurants) => {
     self.markers.push(marker);
   });
 } */
-
+/**
+* @description
+  This method will fetch images as user scrolls down.
+*/
+lazyLoadImages = () => {
+  if ("IntersectionObserver" in window) {
+    window.lazyImageObserver = new IntersectionObserver(function (entries, observer) {
+      entries.forEach(function (entry) {
+        //If portion of the image comes under ViewPort then fetch it.
+        if (entry.isIntersecting) {
+          let lazyImage = entry.target;
+          lazyImage.src = lazyImage.dataset.src;
+          lazyImage.srcset = lazyImage.dataset.srcset;
+          lazyImageObserver.unobserve(lazyImage);
+        }
+      });
+    });
+  }
+};

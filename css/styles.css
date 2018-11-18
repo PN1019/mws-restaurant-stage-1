@@ -31,6 +31,15 @@ h1, h2, h3, h4, h5, h6 {
 article, aside, canvas, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
 	display: block;
 }
+.filter-options label {
+  color: #FFFFFF;
+  font-size: 1rem;
+}
+h1:focus, h2:focus, p:focus,
+td:focus, input:focus, textarea:focus {
+  outline: 1px solid orangered;
+}
+
 #maincontent {
   background-color: #f3f3f3;
   min-height: 100%;
@@ -210,7 +219,7 @@ nav h1 a {
 }
 .inside #map-container {
   height: 100%;
-  position: fixed;
+  position: fixed ;
   right: 0;
   top: 70px;
   width: 50%;
@@ -266,7 +275,11 @@ nav h1 a {
 #reviews-container {
   padding: 10px 1.9% 0;
 }
-#reviews-container h3 {
+#add-review-container {
+  padding: 10px 1.9% 110px;
+}
+#reviews-container h3 ,
+	#add-review-container h3 {
   color: #f58500;
   font-size: 16pt;
   font-weight: 300;
@@ -301,6 +314,28 @@ nav h1 a {
 #restaurant-hours td span {
   padding-right: 5px;
 }
+.review-form div {
+  padding-bottom: 5px;
+  display: flex;
+  flex-direction: column;
+}
+ .review-form input,
+.review-form select,
+.review-form textarea,
+.review-form button {
+  padding: 0.7em;
+}
+ .review-form button {
+  color: #fff;
+  background-color: #8F4100;
+  margin-top: 10px;
+  border: none;
+  text-transform: uppercase;
+}
+ .review-form button:hover {
+  background-color: #000000;
+  outline: 2px solid orangered;
+}
 
 /* ====================== Media Queries ====================== */
 @media screen and (max-width: 950px) {
@@ -329,6 +364,7 @@ nav h1 a {
   #breadcrumb,
   #restaurant-container,
   #reviews-container,
+   #add-review-container
    {
 		padding-left: 3%;
 		padding-right: 3%;

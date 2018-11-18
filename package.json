@@ -2,7 +2,7 @@
   "name": "restaurant-reviews",
   "version": "1.0.0",
   "description": "Restaurant Reviews PWA for MWS Nanodegree",
-  "main": "main.js",
+  "main": "gulpfile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "serve": "gulp dist"
@@ -28,6 +28,7 @@
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^6.0.0",
     "gulp-connect": "^5.6.1",
+    "gulp-gzip": "^1.4.2",
     "gulp-imagemin": "^4.1.0",
     "gulp-sequence": "^1.0.0",
     "gulp-sourcemaps": "^2.6.4",
@@ -37,6 +38,7 @@
     "gulp-webp": "^3.0.0"
   },
   "dependencies": {
+    "connect-gzip-static": "^2.1.1",
     "cors": "^2.8.4",
     "gulp-sass": "^4.0.2",
     "npm": "^6.4.1"

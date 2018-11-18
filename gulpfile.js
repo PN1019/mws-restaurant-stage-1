@@ -1,8 +1,11 @@
 var autoprefixer = require('gulp-autoprefixer');
 var browserSync = require('browser-sync').create();
 var connect = require('gulp-connect');
+
 var del = require('del');
 var gulp = require("gulp");
+var gzip = require('gulp-gzip');
+var gzipStatic = require('connect-gzip-static');
 var gulpSequence = require('gulp-sequence');
 
 var imagemin = require('gulp-imagemin');
@@ -37,21 +40,19 @@ gulp.task('default', ['clean', 'copy-html', 'copy-icons','minify-images','minify
 });
 
 gulp.task('dist', function(done){
-	gulpSequence('clean','minify-images,'['start','watch'],done);
+	gulpSequence('clean:dist',['copy'],['gzip'],['start','watch'],done);
 });
-//gulpSequence(['clean:dist','copy-html', 'copy-icons', 'minify-images', 'minify-styles', 'scripts-dist',
-   // 'service-worker', 'copy-manifest'
-//]));
+gulp.task('copy',['copy-html', 'minify-images', 'minify-styles', 'scripts-dist',
+   'service-worker', 'copy-manifest'
+]);
 
    
 //=======Cleaning up generated files automatically==============//
 gulp.task('clean:dist', function() {
-  return del.sync('dist/**');
-})
-// Clean temp directory
-gulp.task('clean', function () {
-  return del(['.tmp/**/*']); // del files rather than dirs to avoid error
+  return del.sync('dist/**',{
+  force:true});
 });
+
 //=================Convert and Minify Images to WebP  =================//
 gulp.task('minify-images', function(){
   return gulp.src('img/**/*.+(png|jpg|gif)')
@@ -106,15 +107,38 @@ gulp.task('minify-styles', function () {
         .pipe(gulp.dest('dist/css'))
         .pipe(connect.reload());
 });
+// gZip tasks
+gulp.task('gzip', ['gzip-html', 'gzip-css', 'gzip-js'], function () {});
+/*========g-zipping compression=========*/
+gulp.task('gzip-html', function () {
+    gulp.src('**/*.html')
+        .pipe(gzip())
+        .pipe(gulp.dest('dist/html'));
+});
+
+gulp.task('gzip-css', function () {
+    gulp.src('css/**/*.css')
+        .pipe(gzip())
+        .pipe(gulp.dest('dist/css'));
+});
+
+gulp.task('gzip-js', function () {
+    gulp.src('js/**/*.js')
+        .pipe(gzip())
+        .pipe(gulp.dest('dist/js'));
+});
 /*=======================Starts the server in /dist directory=========================**/
 gulp.task('start', function () {
     // var oneDay = 86400000;
     connect.server({
-        root: 'dist',
+        root: './dist/html/index.html',
         port: 8000,
         livereload: false,
         middleware: function () {
             return [
+			     gzipStatic(__dirname, {
+                    maxAge: 31536000000
+                })
                 // connectGzip.gzip()
             ];
         }

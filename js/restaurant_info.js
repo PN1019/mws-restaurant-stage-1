@@ -62,7 +62,7 @@ fetchRestaurantFromURL = (callback) => {
   }
   const id = getParameterByName('id');
   if (!id) { // no id found in URL
-    error = 'No restaurant id in URL'
+    error = 'No restaurant id in URL';
     callback(error, null);
   } else {
     DBHelper.fetchRestaurantById(id, (error, restaurant) => {
@@ -83,25 +83,28 @@ fetchRestaurantFromURL = (callback) => {
 fillRestaurantHTML = (restaurant = self.restaurant) => {
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
+  name.tabIndex = 0;
 
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;
+  address.tabIndex = 0;
 
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img'
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
   // Add alt-text for image according to restaurant name.
   image.alt = "Image of the restaurant " + restaurant.name;
-
+  image.tabIndex = 0;
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
-
+  cuisine.tabIndex = 0;
   // fill operating hours
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
   // fill reviews
-  fillReviewsHTML();
+  //fillReviewsHTML();
+  fetchRestaurantReviews();
 }
 
 /**
@@ -114,15 +117,36 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 
     const day = document.createElement('td');
     day.innerHTML = key;
+	day.tabIndex=0;
     row.appendChild(day);
 
     const time = document.createElement('td');
     time.innerHTML = operatingHours[key];
+	time.tabIndex=0;
     row.appendChild(time);
 
     hours.appendChild(row);
   }
 }
+
+/**
+ * Fetch Restaurant reviews
+ */
+fetchRestaurantReviews = () => {
+  const restaurantID = getParameterByName("id");
+   if (!restaurantID) {
+    console.error('No restaurant id in URL');
+    return;
+  }
+   DBHelper.fetchReviewsById(restaurantID, (err, reviews) => {
+     if (err || !reviews) {
+      console.log(`No reviews for restaurant id ${restaurantID}`);
+      return;
+    }
+     fillReviewsHTML(reviews);
+  });
+};
+
 
 /**
  * Create all reviews HTML and add them to the webpage.
@@ -131,11 +155,13 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h3');
   title.innerHTML = 'Reviews';
+  title.tabIndex=0;
   container.appendChild(title);
 
   if (!reviews) {
     const noReviews = document.createElement('p');
     noReviews.innerHTML = 'No reviews yet!';
+	noReviews.tabIndex=0;
     container.appendChild(noReviews);
     return;
   }
@@ -153,18 +179,22 @@ createReviewHTML = (review) => {
   const li = document.createElement('li');
   const name = document.createElement('p');
   name.innerHTML = review.name;
+  name.tabIndex=0;
   li.appendChild(name);
 
   const date = document.createElement('p');
   date.innerHTML = review.date;
+  date.tabIndex=0;
   li.appendChild(date);
 
   const rating = document.createElement('p');
   rating.innerHTML = `Rating: ${review.rating}`;
+  rating.tabIndex=0;
   li.appendChild(rating);
 
   const comments = document.createElement('p');
   comments.innerHTML = review.comments;
+  comments.tabIndex=0;
   li.appendChild(comments);
 
   return li;
@@ -194,4 +224,25 @@ getParameterByName = (name, url) => {
   if (!results[2])
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
-}
+};
+
+const reviewForm = document.querySelector('.review-form');
+/**
+ * Submit review which is entered by user.
+ */
+reviewForm.addEventListener('submit', event => {
+  event.preventDefault();
+  const reviewObject = {
+    restaurant_id: self.restaurant.id,
+    name: reviewForm.querySelector('#name').value,
+    rating: reviewForm.querySelector('#rating').value,
+    comments: reviewForm.querySelector('#comment').value,
+  }
+  DBHelper.submitReview(reviewObject).then(data => {
+	   const reviewList = document.querySelector('#reviews-list');
+	   reviewList.appendChild(createReviewHTML(reviewObject));
+    reviewForm.reset();
+  }).catch(error => console.log(error));
+})
+  
+  
